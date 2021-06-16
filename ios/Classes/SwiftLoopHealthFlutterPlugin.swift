@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import LoopKit
 
 public class SwiftLoopHealthFlutterPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {

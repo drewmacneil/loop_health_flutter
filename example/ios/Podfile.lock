@@ -2,10 +2,20 @@ PODS:
   - Flutter (1.0.0)
   - loop_health_flutter (0.0.1):
     - Flutter
+    - LoopKit (~> 3.0.1)
+  - LoopKit (3.0.1):
+    - SwiftCharts (~> 0.6.5)
+  - SwiftCharts (0.6.5)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - loop_health_flutter (from `.symlinks/plugins/loop_health_flutter/ios`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - SwiftCharts
+  https://github.com/drewmacneil/loop_flutter_podspecs:
+    - LoopKit
 
 EXTERNAL SOURCES:
   Flutter:
@@ -15,8 +25,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  loop_health_flutter: 837d9c4b0f7e3cd0f0c4ae8501d44c3091fefe75
+  loop_health_flutter: 031bb5c42532fcd278d1dcf74c160b5e396c3403
+  LoopKit: 10acfda94215061ec2c146d34a26b868bd750bc2
+  SwiftCharts: 2e755ea292f0b87d3e4b2c1eb5afc080a20cdc15
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: 05dc6b4272fa54c2aae1b0e2e8c0bfff25bf0ef4
 
 COCOAPODS: 1.10.1
