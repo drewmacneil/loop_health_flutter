@@ -2,14 +2,16 @@ import Flutter
 import UIKit
 import LoopKit
 
-public class SwiftLoopHealthFlutterPlugin: NSObject, FlutterPlugin {
+public class SwiftLoopHealthFlutterPlugin: NSObject, FlutterPlugin, LHApi {
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "loop_health_flutter", binaryMessenger: registrar.messenger())
-    let instance = SwiftLoopHealthFlutterPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
+    let messenger: FlutterBinaryMessenger = registrar.messenger()
+    let api: LHApi = SwiftLoopHealthFlutterPlugin()
+    LHApiSetup(messenger, api)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    result("iOS " + UIDevice.current.systemVersion)
+  public func getPlatformVersion(_ error: AutoreleasingUnsafeMutablePointer<FlutterError?>) -> LHVersion? {
+    let version = LHVersion.init()
+    version.string = "iOS " + UIDevice.current.systemVersion
+    return version
   }
 }
