@@ -7,14 +7,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class LHVersion;
+@class LHStoredGlucoseResponse;
+@class LHStoredGlucoseRequest;
 
-@interface LHVersion : NSObject
-@property(nonatomic, copy, nullable) NSString * string;
+@interface LHStoredGlucoseResponse : NSObject
+@property(nonatomic, strong, nullable) NSArray * serializedStoredGlucoseValues;
+@end
+
+@interface LHStoredGlucoseRequest : NSObject
+@property(nonatomic, strong, nullable) NSNumber * startTimestamp;
+@property(nonatomic, strong, nullable) NSNumber * endTimestamp;
 @end
 
 @protocol LHApi
--(nullable LHVersion *)getPlatformVersion:(FlutterError *_Nullable *_Nonnull)error;
+-(void)getGlucoseSamples:(nullable LHStoredGlucoseRequest *)input completion:(void(^)(LHStoredGlucoseResponse *_Nullable, FlutterError *_Nullable))completion;
 @end
 
 extern void LHApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<LHApi> _Nullable api);

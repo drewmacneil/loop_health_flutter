@@ -7,19 +7,38 @@ import 'dart:typed_data' show Uint8List, Int32List, Int64List, Float64List;
 
 import 'package:flutter/services.dart';
 
-class Version {
-  String? string;
+class StoredGlucoseResponse {
+  List<Object?>? serializedStoredGlucoseValues;
 
   Object encode() {
     final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
-    pigeonMap['string'] = string;
+    pigeonMap['serializedStoredGlucoseValues'] = serializedStoredGlucoseValues;
     return pigeonMap;
   }
 
-  static Version decode(Object message) {
+  static StoredGlucoseResponse decode(Object message) {
     final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
-    return Version()
-      ..string = pigeonMap['string'] as String?;
+    return StoredGlucoseResponse()
+      ..serializedStoredGlucoseValues = pigeonMap['serializedStoredGlucoseValues'] as List<Object?>?;
+  }
+}
+
+class StoredGlucoseRequest {
+  double? startTimestamp;
+  double? endTimestamp;
+
+  Object encode() {
+    final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
+    pigeonMap['startTimestamp'] = startTimestamp;
+    pigeonMap['endTimestamp'] = endTimestamp;
+    return pigeonMap;
+  }
+
+  static StoredGlucoseRequest decode(Object message) {
+    final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
+    return StoredGlucoseRequest()
+      ..startTimestamp = pigeonMap['startTimestamp'] as double?
+      ..endTimestamp = pigeonMap['endTimestamp'] as double?;
   }
 }
 
@@ -31,11 +50,12 @@ class Api {
 
   final BinaryMessenger? _binaryMessenger;
 
-  Future<Version> getPlatformVersion() async {
+  Future<StoredGlucoseResponse> getGlucoseSamples(StoredGlucoseRequest arg) async {
+    final Object encoded = arg.encode();
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
-        'dev.flutter.pigeon.Api.getPlatformVersion', const StandardMessageCodec(), binaryMessenger: _binaryMessenger);
+        'dev.flutter.pigeon.Api.getGlucoseSamples', const StandardMessageCodec(), binaryMessenger: _binaryMessenger);
     final Map<Object?, Object?>? replyMap =
-        await channel.send(null) as Map<Object?, Object?>?;
+        await channel.send(encoded) as Map<Object?, Object?>?;
     if (replyMap == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -50,7 +70,7 @@ class Api {
         details: error['details'],
       );
     } else {
-      return Version.decode(replyMap['result']!);
+      return StoredGlucoseResponse.decode(replyMap['result']!);
     }
   }
 }

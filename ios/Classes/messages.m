@@ -22,22 +22,44 @@ static NSDictionary<NSString*, id>* wrapResult(NSDictionary *result, FlutterErro
       };
 }
 
-@interface LHVersion ()
-+(LHVersion*)fromMap:(NSDictionary*)dict;
+@interface LHStoredGlucoseResponse ()
++(LHStoredGlucoseResponse*)fromMap:(NSDictionary*)dict;
+-(NSDictionary*)toMap;
+@end
+@interface LHStoredGlucoseRequest ()
++(LHStoredGlucoseRequest*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
 @end
 
-@implementation LHVersion
-+(LHVersion*)fromMap:(NSDictionary*)dict {
-  LHVersion* result = [[LHVersion alloc] init];
-  result.string = dict[@"string"];
-  if ((NSNull *)result.string == [NSNull null]) {
-    result.string = nil;
+@implementation LHStoredGlucoseResponse
++(LHStoredGlucoseResponse*)fromMap:(NSDictionary*)dict {
+  LHStoredGlucoseResponse* result = [[LHStoredGlucoseResponse alloc] init];
+  result.serializedStoredGlucoseValues = dict[@"serializedStoredGlucoseValues"];
+  if ((NSNull *)result.serializedStoredGlucoseValues == [NSNull null]) {
+    result.serializedStoredGlucoseValues = nil;
   }
   return result;
 }
 -(NSDictionary*)toMap {
-  return [NSDictionary dictionaryWithObjectsAndKeys:(self.string ? self.string : [NSNull null]), @"string", nil];
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.serializedStoredGlucoseValues ? self.serializedStoredGlucoseValues : [NSNull null]), @"serializedStoredGlucoseValues", nil];
+}
+@end
+
+@implementation LHStoredGlucoseRequest
++(LHStoredGlucoseRequest*)fromMap:(NSDictionary*)dict {
+  LHStoredGlucoseRequest* result = [[LHStoredGlucoseRequest alloc] init];
+  result.startTimestamp = dict[@"startTimestamp"];
+  if ((NSNull *)result.startTimestamp == [NSNull null]) {
+    result.startTimestamp = nil;
+  }
+  result.endTimestamp = dict[@"endTimestamp"];
+  if ((NSNull *)result.endTimestamp == [NSNull null]) {
+    result.endTimestamp = nil;
+  }
+  return result;
+}
+-(NSDictionary*)toMap {
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.startTimestamp ? self.startTimestamp : [NSNull null]), @"startTimestamp", (self.endTimestamp ? self.endTimestamp : [NSNull null]), @"endTimestamp", nil];
 }
 @end
 
@@ -45,13 +67,14 @@ void LHApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<LHApi> api) {
   {
     FlutterBasicMessageChannel *channel =
       [FlutterBasicMessageChannel
-        messageChannelWithName:@"dev.flutter.pigeon.Api.getPlatformVersion"
+        messageChannelWithName:@"dev.flutter.pigeon.Api.getGlucoseSamples"
         binaryMessenger:binaryMessenger];
     if (api) {
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
-        FlutterError *error;
-        LHVersion *output = [api getPlatformVersion:&error];
-        callback(wrapResult([output toMap], error));
+        LHStoredGlucoseRequest *input = [LHStoredGlucoseRequest fromMap:message];
+        [api getGlucoseSamples:input completion:^(LHStoredGlucoseResponse *_Nullable output, FlutterError *_Nullable error) {
+          callback(wrapResult([output toMap], error));
+        }];
       }];
     }
     else {
