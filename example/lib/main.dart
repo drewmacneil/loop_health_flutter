@@ -14,7 +14,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  List<StoredGlucoseSample> _samples = List.from([]);
+  List<DeserializedStoredGlucoseSample> _samples = List.from([]);
 
   @override
   void initState() {
@@ -23,7 +23,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> retrieveGlucoseSamples() async {
-    List<StoredGlucoseSample> samples;
+    await LoopHealthFlutter.listenForHealthData();
+
+    List<DeserializedStoredGlucoseSample> samples;
     samples = await LoopHealthFlutter.getGlucoseSamples();
 
     setState(() {

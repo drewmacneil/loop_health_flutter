@@ -7,8 +7,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class LHStoredGlucoseSample;
 @class LHStoredGlucoseResponse;
 @class LHStoredGlucoseRequest;
+
+@interface LHStoredGlucoseSample : NSObject
+@property(nonatomic, strong, nullable) NSNumber * timestamp;
+@property(nonatomic, strong, nullable) NSNumber * quantity;
+@end
 
 @interface LHStoredGlucoseResponse : NSObject
 @property(nonatomic, strong, nullable) NSArray * serializedStoredGlucoseValues;
@@ -19,7 +25,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong, nullable) NSNumber * endTimestamp;
 @end
 
+@interface LHCallbackApi : NSObject
+- (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
+- (void)newSample:(LHStoredGlucoseSample*)input completion:(void(^)(NSError* _Nullable))completion;
+@end
 @protocol LHApi
+-(void)listenForHealthData:(FlutterError *_Nullable *_Nonnull)error;
 -(void)getGlucoseSamples:(nullable LHStoredGlucoseRequest *)input completion:(void(^)(LHStoredGlucoseResponse *_Nullable, FlutterError *_Nullable))completion;
 @end
 

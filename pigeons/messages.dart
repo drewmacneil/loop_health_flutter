@@ -11,8 +11,22 @@ class StoredGlucoseResponse {
   List<String>? serializedStoredGlucoseValues;
 }
 
+class StoredGlucoseSample {
+  // Seconds since epoch.
+  double? timestamp;
+  // Glucose value in mg/dL.
+  int? quantity;
+}
+
 @HostApi()
 abstract class Api {
+  void listenForHealthData();
+
   @async
   StoredGlucoseResponse getGlucoseSamples(StoredGlucoseRequest request);
+}
+
+@FlutterApi()
+abstract class CallbackApi {
+  void newSample(StoredGlucoseSample glucoseSample);
 }

@@ -22,6 +22,10 @@ static NSDictionary<NSString*, id>* wrapResult(NSDictionary *result, FlutterErro
       };
 }
 
+@interface LHStoredGlucoseSample ()
++(LHStoredGlucoseSample*)fromMap:(NSDictionary*)dict;
+-(NSDictionary*)toMap;
+@end
 @interface LHStoredGlucoseResponse ()
 +(LHStoredGlucoseResponse*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
@@ -29,6 +33,24 @@ static NSDictionary<NSString*, id>* wrapResult(NSDictionary *result, FlutterErro
 @interface LHStoredGlucoseRequest ()
 +(LHStoredGlucoseRequest*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
+@end
+
+@implementation LHStoredGlucoseSample
++(LHStoredGlucoseSample*)fromMap:(NSDictionary*)dict {
+  LHStoredGlucoseSample* result = [[LHStoredGlucoseSample alloc] init];
+  result.timestamp = dict[@"timestamp"];
+  if ((NSNull *)result.timestamp == [NSNull null]) {
+    result.timestamp = nil;
+  }
+  result.quantity = dict[@"quantity"];
+  if ((NSNull *)result.quantity == [NSNull null]) {
+    result.quantity = nil;
+  }
+  return result;
+}
+-(NSDictionary*)toMap {
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.timestamp ? self.timestamp : [NSNull null]), @"timestamp", (self.quantity ? self.quantity : [NSNull null]), @"quantity", nil];
+}
 @end
 
 @implementation LHStoredGlucoseResponse
@@ -63,7 +85,47 @@ static NSDictionary<NSString*, id>* wrapResult(NSDictionary *result, FlutterErro
 }
 @end
 
+@interface LHCallbackApi ()
+@property (nonatomic, strong) NSObject<FlutterBinaryMessenger>* binaryMessenger;
+@end
+
+@implementation LHCallbackApi
+- (instancetype)initWithBinaryMessenger:(NSObject<FlutterBinaryMessenger>*)binaryMessenger {
+  self = [super init];
+  if (self) {
+    _binaryMessenger = binaryMessenger;
+  }
+  return self;
+}
+
+- (void)newSample:(LHStoredGlucoseSample*)input completion:(void(^)(NSError* _Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.CallbackApi.newSample"
+      binaryMessenger:self.binaryMessenger];
+  NSDictionary* inputMap = [input toMap];
+  [channel sendMessage:inputMap reply:^(id reply) {
+    completion(nil);
+  }];
+}
+@end
 void LHApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<LHApi> api) {
+  {
+    FlutterBasicMessageChannel *channel =
+      [FlutterBasicMessageChannel
+        messageChannelWithName:@"dev.flutter.pigeon.Api.listenForHealthData"
+        binaryMessenger:binaryMessenger];
+    if (api) {
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api listenForHealthData:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
   {
     FlutterBasicMessageChannel *channel =
       [FlutterBasicMessageChannel

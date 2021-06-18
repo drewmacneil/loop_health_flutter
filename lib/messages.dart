@@ -7,6 +7,25 @@ import 'dart:typed_data' show Uint8List, Int32List, Int64List, Float64List;
 
 import 'package:flutter/services.dart';
 
+class StoredGlucoseSample {
+  double? timestamp;
+  int? quantity;
+
+  Object encode() {
+    final Map<Object?, Object?> pigeonMap = <Object?, Object?>{};
+    pigeonMap['timestamp'] = timestamp;
+    pigeonMap['quantity'] = quantity;
+    return pigeonMap;
+  }
+
+  static StoredGlucoseSample decode(Object message) {
+    final Map<Object?, Object?> pigeonMap = message as Map<Object?, Object?>;
+    return StoredGlucoseSample()
+      ..timestamp = pigeonMap['timestamp'] as double?
+      ..quantity = pigeonMap['quantity'] as int?;
+  }
+}
+
 class StoredGlucoseResponse {
   List<Object?>? serializedStoredGlucoseValues;
 
@@ -42,6 +61,26 @@ class StoredGlucoseRequest {
   }
 }
 
+abstract class CallbackApi {
+  void newSample(StoredGlucoseSample arg);
+  static void setup(CallbackApi? api) {
+    {
+      const BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.CallbackApi.newSample', StandardMessageCodec());
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          assert(message != null, 'Argument for dev.flutter.pigeon.CallbackApi.newSample was null. Expected StoredGlucoseSample.');
+          final StoredGlucoseSample input = StoredGlucoseSample.decode(message!);
+          api.newSample(input);
+          return;
+        });
+      }
+    }
+  }
+}
+
 class Api {
   /// Constructor for [Api].  The [binaryMessenger] named argument is
   /// available for dependency injection.  If it is left null, the default
@@ -49,6 +88,29 @@ class Api {
   Api({BinaryMessenger? binaryMessenger}) : _binaryMessenger = binaryMessenger;
 
   final BinaryMessenger? _binaryMessenger;
+
+  Future<void> listenForHealthData() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.Api.listenForHealthData', const StandardMessageCodec(), binaryMessenger: _binaryMessenger);
+    final Map<Object?, Object?>? replyMap =
+        await channel.send(null) as Map<Object?, Object?>?;
+    if (replyMap == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+        details: null,
+      );
+    } else if (replyMap['error'] != null) {
+      final Map<Object?, Object?> error = (replyMap['error'] as Map<Object?, Object?>?)!;
+      throw PlatformException(
+        code: (error['code'] as String?)!,
+        message: error['message'] as String?,
+        details: error['details'],
+      );
+    } else {
+      // noop
+    }
+  }
 
   Future<StoredGlucoseResponse> getGlucoseSamples(StoredGlucoseRequest arg) async {
     final Object encoded = arg.encode();
